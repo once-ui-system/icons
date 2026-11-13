@@ -18,7 +18,7 @@ export const BRAND_META = {
   aveiro: { title: "Aveiro", size: 19 },
   chirio: { title: "Chirio", size: 20 },
   tavilio: { title: "Tavilio", size: 20 },
-  sigilio: { title: "Sigilio", size: 19 },
+  sigilio: { title: "Sigilio", size: 19.5 },
   stack: { title: "Stack", size: 19 },
   frametic: { title: "Frametic", size: 19.5 },
   dopler: { title: "Dopler", size: 20 },
@@ -48,10 +48,12 @@ export function transformPath(d, k, ox, oy) {
   return out.replace(/ -/g, "-");
 }
 
+// A path's evenodd fill rule is kept, so marks with holes stay open.
 const marks = fs.readdirSync(SRC).filter((f) => f.endsWith(".svg")).map((f) => {
   const name = f.replace(/\.svg$/, "");
-  const ds = [...new Set([...fs.readFileSync(path.join(SRC, f), "utf8").matchAll(/<path[^>]*\sd="([^"]+)"/g)].map((m) => m[1]))];
-  return { name, ds };
+  const tags = [...fs.readFileSync(path.join(SRC, f), "utf8").matchAll(/<path\b[^>]*>/g)].map((m) => m[0]);
+  const parts = [...new Map(tags.map((t) => [t.match(/\sd="([^"]+)"/)[1], /fill-rule="evenodd"/.test(t)])).entries()];
+  return { name, ds: parts.map(([d]) => d), evenodd: parts.map(([, e]) => e) };
 });
 
 const { chromium } = createRequire(import.meta.url)("playwright");
@@ -69,10 +71,10 @@ const boxes = await page.evaluate((marks) => marks.map(({ ds }) => {
 await browser.close();
 
 const BRANDS = {};
-marks.forEach(({ name, ds }, j) => {
+marks.forEach(({ name, ds, evenodd }, j) => {
   const b = boxes[j], size = BRAND_META[name]?.size ?? 20, k = size / Math.max(b.w, b.h);
   const ox = 12 - (b.x + b.w / 2) * k, oy = 12 - (b.y + b.h / 2) * k;
-  BRANDS[name] = ds.map((d) => transformPath(d, k, ox, oy));
+  BRANDS[name] = ds.map((d, i) => (evenodd[i] ? { d: transformPath(d, k, ox, oy), evenodd: true } : transformPath(d, k, ox, oy)));
 });
 
 fs.writeFileSync(path.join(ROOT, "src", "brands-paths.mjs"),

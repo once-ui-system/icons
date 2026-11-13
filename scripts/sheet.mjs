@@ -57,7 +57,7 @@ p { margin:0; color:var(--muted); max-width:70ch }
   <div class="legend"><span><i style="color:var(--cell)"></i>24 box</span><span><i style="color:var(--key);border-top-style:dashed"></i>2px padding</span><span><i style="color:var(--unit)"></i>1 unit</span></div>
   <div class="board" id="board"></div>
   <h2 style="margin:12px 0 0;font-size:22px;font-weight:600;letter-spacing:-.01em">Brands</h2>
-  <p>Our product marks on the same grid, in their own <code>@once-ui-system/icons/brands</code> entry so a plain Once UI install never carries them. They are the real logos scaled into the padding, one filled drawing that ignores shape and style. Sigilio has no mark yet (its repo still uses Stack's), so its seal is a proposal.</p>
+  <p>Our product marks on the same grid, in their own <code>@once-ui-system/icons/brands</code> entry so a plain Once UI install never carries them. They are the real logos scaled into the padding, one filled drawing that ignores shape and style.</p>
   <div class="board" id="brands"></div>
 </div>
 <script>
