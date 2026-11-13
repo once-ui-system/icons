@@ -1,0 +1,25 @@
+{
+  "name": "@once-ui-system/icons",
+  "version": "0.0.1",
+  "description": "Once UI's own icons, drawn as code in three shapes that follow data-border.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "repository": { "type": "git", "url": "git+https://github.com/once-ui-system/icons.git" },
+  "files": ["dist", "LICENSE", "README.md"],
+  "exports": {
+    "./data": { "types": "./dist/data/index.d.ts", "import": "./dist/data/index.js" },
+    "./react": { "types": "./dist/react/index.d.ts", "import": "./dist/react/index.js" },
+    "./brands": { "types": "./dist/brands/index.d.ts", "import": "./dist/brands/index.js" },
+    "./svg/*": "./dist/svg/*"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "proof": "node scripts/proof.mjs",
+    "brands:import": "node scripts/brands-import.mjs"
+  },
+  "peerDependencies": { "react": ">=18" },
+  "peerDependenciesMeta": { "react": { "optional": true } },
+  "engines": { "node": ">=20" }
+}
