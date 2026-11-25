@@ -10,6 +10,9 @@
  *                          liked) is the end of the motion.
  *   data-active            the on state, with any trigger.
  *
+ * Hover motions answer hover only where a pointer can hover (so a tap leaves
+ * nothing stuck), and keyboard focus everywhere.
+ *
  * Timing follows the shape: playful overshoots, rounded settles, conservative
  * is quick and exact with no pop. It comes from the closest `data-border`
  * (Once UI's theme) or the icon's own `data-shape`. Under
@@ -56,14 +59,23 @@
 :is(
     [data-animate][data-active],
     [data-animate="in"],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   )[data-icon="check"]
   [data-part="tick"] {
   animation:
     icon-draw-check calc(var(--icon-motion-duration) * 1.9) linear both,
     icon-pop calc(var(--icon-motion-duration) * 1.1) var(--icon-motion-ease) calc(var(--icon-motion-duration) * 1.5) both;
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    )[data-icon="check"]
+  [data-part="tick"] {
+    animation:
+      icon-draw-check calc(var(--icon-motion-duration) * 1.9) linear both,
+      icon-pop calc(var(--icon-motion-duration) * 1.1) var(--icon-motion-ease) calc(var(--icon-motion-duration) * 1.5) both;
+  }
 }
 
 /* Checkbox: the box fills, then the tick draws through it. Off, the box is empty. */
@@ -95,20 +107,32 @@
 :is(
     [data-animate][data-active],
     [data-animate="in"],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   )[data-icon="bell"] [data-part="body"] {
   animation: icon-swing calc(var(--icon-motion-duration) * 2.4) ease-out;
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    )[data-icon="bell"] [data-part="body"] {
+    animation: icon-swing calc(var(--icon-motion-duration) * 2.4) ease-out;
+  }
 }
 :is(
     [data-animate][data-active],
     [data-animate="in"],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   )[data-icon="bell"] [data-part="clapper"] {
   animation: icon-swing-clapper calc(var(--icon-motion-duration) * 2.4) ease-out 50ms;
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    )[data-icon="bell"] [data-part="clapper"] {
+    animation: icon-swing-clapper calc(var(--icon-motion-duration) * 2.4) ease-out 50ms;
+  }
 }
 
 /* Plus to close: a turn and a touch longer, for add buttons that become cancel. */
@@ -134,36 +158,57 @@
 }
 :is(
     [data-animate][data-active],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   ):is([data-icon="arrowRight"], [data-icon="arrowLeft"], [data-icon="arrowUp"], [data-icon="arrowDown"])
   path {
   transform: translate(var(--icon-lean));
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    ):is([data-icon="arrowRight"], [data-icon="arrowLeft"], [data-icon="arrowUp"], [data-icon="arrowDown"])
+  path {
+    transform: translate(var(--icon-lean));
+  }
 }
 
 /* Refresh: one full turn. */
 :is(
     [data-animate][data-active],
     [data-animate="in"],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   )[data-icon="refresh"]
   path {
   animation: icon-spin calc(var(--icon-motion-duration) * 3.8) cubic-bezier(0.45, 0, 0.2, 1);
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    )[data-icon="refresh"]
+  path {
+    animation: icon-spin calc(var(--icon-motion-duration) * 3.8) cubic-bezier(0.45, 0, 0.2, 1);
+  }
 }
 
 /* Eye: blinks once. */
 :is(
     [data-animate][data-active],
     [data-animate="in"],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   )[data-icon="eye"]
   path {
   animation: icon-blink calc(var(--icon-motion-duration) * 1.1) ease-in-out;
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    )[data-icon="eye"]
+  path {
+    animation: icon-blink calc(var(--icon-motion-duration) * 1.1) ease-in-out;
+  }
 }
 
 /* Heart: the line turns solid with a beat, for like and favourite. */
@@ -182,12 +227,19 @@
 }
 :is(
     [data-animate][data-active],
-    [data-animate="hover"]:hover,
-    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
-      [data-animate="hover"]
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):focus-visible [data-animate="hover"]
   )[data-icon="trash"]
   [data-part="lid"] {
   transform: translateY(-1.6px) rotate(14deg);
+}
+@media (hover: hover) {
+  :is(
+      [data-animate="hover"]:hover,
+      :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):hover [data-animate="hover"]
+    )[data-icon="trash"]
+  [data-part="lid"] {
+    transform: translateY(-1.6px) rotate(14deg);
+  }
 }
 
 /* Menu: the three lines fold into a cross in the same spot. */
