@@ -4,13 +4,14 @@
   "description": "Once UI's own icons, drawn as code in three shapes that follow data-border.",
   "license": "MIT",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": ["*.css"],
   "repository": { "type": "git", "url": "git+https://github.com/once-ui-system/icons.git" },
   "files": ["dist", "LICENSE", "README.md"],
   "exports": {
     "./data": { "types": "./dist/data/index.d.ts", "import": "./dist/data/index.js" },
     "./react": { "types": "./dist/react/index.d.ts", "import": "./dist/react/index.js" },
     "./brands": { "types": "./dist/brands/index.d.ts", "import": "./dist/brands/index.js" },
+    "./motion.css": "./dist/motion.css",
     "./svg/*": "./dist/svg/*"
   },
   "scripts": {

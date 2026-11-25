@@ -3,10 +3,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { partAttrs } from "../src/render.mjs";
+import { partAttrs, svgAttr } from "../src/render.mjs";
 import { ICONS } from "../src/icons.mjs";
 import { BRANDS, BRAND_TITLES } from "../src/brands.mjs";
 import { DEFAULT_SHAPE, SHAPES, STROKE } from "../src/shapes.mjs";
+import { MOTIONS } from "../src/motion.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -24,10 +25,9 @@ export function node(name, shape, solid = false) {
   };
 }
 
-const kebab = (k) => (k === "viewBox" ? k : k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`));
 const toSvg = (n, root = true) =>
   `<${n.tag}${root ? ' xmlns="http://www.w3.org/2000/svg" width="24" height="24"' : ""}${Object.entries(n.attr)
-    .map(([k, v]) => ` ${kebab(k)}="${v}"`).join("")}>${n.child.map((c) => toSvg(c, false)).join("")}</${n.tag}>`;
+    .map(([k, v]) => ` ${svgAttr(k)}="${v}"`).join("")}>${n.child.map((c) => toSvg(c, false)).join("")}</${n.tag}>`;
 const pascal = (s) => s[0].toUpperCase() + s.slice(1);
 
 const names = Object.keys(ICONS).sort();
@@ -46,37 +46,52 @@ for (const shape of Object.keys(SHAPES)) {
 
 fs.mkdirSync(path.join(DIST, "data"), { recursive: true });
 fs.writeFileSync(path.join(DIST, "data", "index.js"),
-  `export const shapes = ${JSON.stringify(Object.keys(SHAPES))};\nexport const defaultShape = "${DEFAULT_SHAPE}";\nexport const iconData = ${JSON.stringify(data)};\n`);
+  `export const shapes = ${JSON.stringify(Object.keys(SHAPES))};\nexport const defaultShape = "${DEFAULT_SHAPE}";\nexport const motions = ${JSON.stringify(MOTIONS)};\nexport const iconData = ${JSON.stringify(data)};\n`);
 fs.writeFileSync(path.join(DIST, "data", "index.d.ts"),
   `export type IconShape = ${Object.keys(SHAPES).map((s) => `"${s}"`).join(" | ")};
 export type IconName = ${names.map((n) => `"${n}"`).join(" | ")};
 export interface IconNode { tag: string; attr: Record<string, string>; child: IconNode[] }
 export declare const shapes: IconShape[];
 export declare const defaultShape: IconShape;
+export type IconMotionTrigger = "in" | "hover" | "active";
+/** Icons that move (src/motion.css) and the trigger each uses by default. */
+export declare const motions: Partial<Record<IconName, IconMotionTrigger>>;
 export declare const iconData: Record<IconShape, Record<IconName, { line: IconNode; solid: IconNode }>>;
 `);
 
-// React: one component per icon, tree-shakable; `shape` and `solid` props.
+// React: one component per icon, tree-shakable; `shape`, `solid`, `animate` and `active` props.
 fs.mkdirSync(path.join(DIST, "react"), { recursive: true });
 fs.writeFileSync(path.join(DIST, "react", "index.js"), `import { createElement as h } from "react";
-import { iconData, defaultShape } from "../data/index.js";
+import { iconData, defaultShape, motions } from "../data/index.js";
 const render = (n, k) => h(n.tag, { key: k, ...n.attr }, n.child.map(render));
 export function createIcon(name) {
-  const Icon = ({ shape = defaultShape, solid = false, ...props }) => {
+  const Icon = ({ shape = defaultShape, solid = false, animate, active, ...props }) => {
     const n = iconData[shape][name][solid ? "solid" : "line"];
-    return h("svg", { ...n.attr, width: "1em", height: "1em", ...props }, n.child.map(render));
+    // animate: true (or only active) uses the icon's own trigger; an icon with no motion stays still.
+    const trigger = motions[name] && (animate === true || (animate === undefined && active !== undefined) ? motions[name] : animate || undefined);
+    const motion = trigger ? { "data-icon": name, "data-animate": trigger, "data-active": active ? "" : undefined, "data-shape": shape } : {};
+    return h("svg", { ...n.attr, width: "1em", height: "1em", ...motion, ...props }, n.child.map(render));
   };
-  Icon.displayName = "${"${"}name${"}"}";
+  Icon.displayName = "\${name}";
   return Icon;
 }
 ${names.map((n) => `export const ${pascal(n)}Icon = /*#__PURE__*/ createIcon("${n}");`).join("\n")}
-`.replace('"${name}"', "name"));
+`.replace('"\${name}"', "name"));
 fs.writeFileSync(path.join(DIST, "react", "index.d.ts"), `import type { ComponentType, SVGProps } from "react";
-import type { IconName, IconShape } from "../data/index.js";
-export interface IconProps extends SVGProps<SVGSVGElement> { shape?: IconShape; solid?: boolean }
+import type { IconMotionTrigger, IconName, IconShape } from "../data/index.js";
+export interface IconProps extends SVGProps<SVGSVGElement> {
+  shape?: IconShape;
+  solid?: boolean;
+  /** Play the icon's motion (import "@once-ui-system/icons/motion.css" once). true uses its own trigger. */
+  animate?: boolean | IconMotionTrigger;
+  /** The on state (open, checked, liked) for icons whose motion follows a state. Implies animate. */
+  active?: boolean;
+}
 export declare function createIcon(name: IconName): ComponentType<IconProps>;
 ${names.map((n) => `export declare const ${pascal(n)}Icon: ComponentType<IconProps>;`).join("\n")}
 `);
+// Motion: one stylesheet for every animated icon.
+fs.copyFileSync(path.join(ROOT, "src", "motion.css"), path.join(DIST, "motion.css"));
 // Brands: our product marks, a separate entry point so the default set stays logo-free.
 // One filled drawing each, the same in every shape.
 const brandNames = Object.keys(BRANDS).sort();

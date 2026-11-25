@@ -10,7 +10,8 @@ const ARROW_HEAD = [[12.5, 5.75], [18.75, 12], [12.5, 18.25]];
 const ARROW_SHAFT = [[5.25, 12], [17.75, 12]];
 const DOUBLE = [[[6.25, 5.5], [12.75, 12], [6.25, 18.5]], [[11.75, 5.5], [18.25, 12], [11.75, 18.5]]];
 const chevron = (q) => (s) => [{ d: rounded(turn(CHEVRON, q), s.tip) }];
-const arrow = (q) => (s) => [{ d: line(...turn(ARROW_SHAFT, q)) + rounded(turn(ARROW_HEAD, q), s.tip) }];
+// Shaft and head are separate parts so motion can grow the shaft behind the head.
+const arrow = (q) => (s) => [{ d: line(...turn(ARROW_SHAFT, q)), part: "shaft" }, { d: rounded(turn(ARROW_HEAD, q), s.tip), part: "head" }];
 const double = (mirror) => (s) => [{ d: DOUBLE.map((c) => rounded(mirror ? flip(c) : c, s.tip)).join("") }];
 
 /**
@@ -20,9 +21,11 @@ const double = (mirror) => (s) => [{ d: DOUBLE.map((c) => rounded(mirror ? flip(
  * cut   - the knock line for solid, overshooting the outline with butt caps so it
  *         divides the shape cleanly; in line style `d` ends on the outline instead.
  * dot   - always a filled dot.
+ * part  - names the piece for motion (`data-part`): bell's clapper, trash's lid, an arrow's shaft.
+ * draw  - the part can draw itself on (`pathLength="1"`), as the check does.
  */
 export const ICONS = {
-  check: (s) => [{ d: rounded([[4.75, 12.5], [9.5, 17.25], [19.25, 7]], s.tip) }],
+  check: (s) => [{ d: rounded([[4.75, 12.5], [9.5, 17.25], [19.25, 7]], s.tip), part: "tick", draw: true }],
   close: () => [{ d: line([6, 6], [18, 18]) + line([18, 6], [6, 18]) }],
   plus: () => [{ d: line([12, 4.75], [12, 19.25]) + line([4.75, 12], [19.25, 12]) }],
   chevronRight: chevron(0),
@@ -38,7 +41,7 @@ export const ICONS = {
   arrowUp: arrow(3),
   arrowUpRight: (s) => [{ d: line([6.25, 17.75], [16.75, 7.25]) + rounded([[9, 6.5], [17.5, 6.5], [17.5, 15]], s.tip) }],
   minus: () => [{ d: line([4.75, 12], [19.25, 12]) }],
-  menu: () => [{ d: line([4, 6.75], [20, 6.75]) + line([4, 12], [20, 12]) + line([4, 17.25], [20, 17.25]) }],
+  menu: () => [{ d: line([4, 6.75], [20, 6.75]), part: "top" }, { d: line([4, 12], [20, 12]), part: "middle" }, { d: line([4, 17.25], [20, 17.25]), part: "bottom" }],
   moreHorizontal: (s) => [{ d: [5.5, 12, 18.5].map((x) => dot([x, 12], s.cap === "square")).join(""), dot: true }],
   search: () => [{ d: circle(10.75, 10.75, 6.5), fill: true }, { d: line([15.5, 15.5], [20, 20]) }],
   home: (s) => [
@@ -49,9 +52,9 @@ export const ICONS = {
     { d: rounded([[10, 20.25], [10, 15], [14, 15], [14, 20.25]], s.corner * 0.6), knock: true, cut: rounded([[10, 21.75], [10, 15], [14, 15], [14, 21.75]], s.corner * 0.6) },
   ],
   bell: (s) => [
-    { d: "M6.25 16.75V11a5.75 5.75 0 0 1 11.5 0v5.75", fill: true },
-    { d: line([4.75, 16.75], [19.25, 16.75]) },
-    { d: "M10 20a2 2 0 0 0 4 0" },
+    { d: "M6.25 16.75V11a5.75 5.75 0 0 1 11.5 0v5.75", fill: true, part: "body" },
+    { d: line([4.75, 16.75], [19.25, 16.75]), part: "body" },
+    { d: "M10 20a2 2 0 0 0 4 0", part: "clapper" },
   ],
   calendar: (s) => [
     { d: rect(3.75, 5.25, 16.5, 15, s.rect), fill: true },
@@ -76,8 +79,8 @@ export const ICONS = {
     { d: line([12, 14.25], [12, 16.5]), knock: true },
   ],
   trash: (s) => [
-    { d: line([4, 6.5], [20, 6.5]) },
-    { d: rounded([[9.25, 6.5], [9.25, 3.75], [14.75, 3.75], [14.75, 6.5]], s.corner * 0.6) },
+    { d: line([4, 6.5], [20, 6.5]), part: "lid" },
+    { d: rounded([[9.25, 6.5], [9.25, 3.75], [14.75, 3.75], [14.75, 6.5]], s.corner * 0.6), part: "lid" },
     { d: rounded([[6, 6.5], [6.9, 20.25], [17.1, 20.25], [18, 6.5]], s.corner), fill: true },
     { d: line([10, 10.5], [10, 16.25]) + line([14, 10.5], [14, 16.25]), knock: true },
   ],
