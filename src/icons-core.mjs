@@ -107,7 +107,7 @@ export const CORE_ICONS = {
     { d: rounded([[12, 3.5], [21, 19.75], [3, 19.75]], fil(s, 0.6), true), fill: true },
     { d: line([12, 9.5], [12, 13.5]), knock: true }, { d: dot([12, 16.5], sq(s)), dot: true, knock: true },
   ],
-  checkbox: (s) => [{ d: rect(3.75, 3.75, 16.5, 16.5, s.rect), fill: true }, { d: rounded([[8, 12.25], [10.75, 15], [16, 9.25]], s.tip), knock: true }],
+  checkbox: (s) => [{ d: rect(3.75, 3.75, 16.5, 16.5, s.rect), fill: true, part: "box" }, { d: rounded([[8, 12.25], [10.75, 15], [16, 9.25]], s.tip), knock: true, part: "tick", draw: true }],
   security: (s) => [
     { d: "M12 3.25 19.75 6v5.5c0 4.5-3.25 8-7.75 9.25C7.5 19.5 4.25 16 4.25 11.5V6Z", fill: true },
     { d: rounded([[9, 12.25], [11.25, 14.5], [15.25, 10]], s.tip), knock: true },

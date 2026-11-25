@@ -1,0 +1,262 @@
+/*
+ * Once UI icon motion. Plain CSS, no JavaScript: an icon moves when it carries
+ * `data-animate` and its `data-icon` names one of the icons below.
+ *
+ *   data-animate="hover"   plays while the icon, or the control around it
+ *                          (link, button, menu item, option, tab, label,
+ *                          summary), is hovered or keyboard-focused.
+ *   data-animate="in"      plays once when the icon appears.
+ *   data-animate="active"  follows data-active: the on state (open, checked,
+ *                          liked) is the end of the motion.
+ *   data-active            the on state, with any trigger.
+ *
+ * Timing follows the shape: playful overshoots, rounded settles, conservative
+ * is quick and exact with no pop. It comes from the closest `data-border`
+ * (Once UI's theme) or the icon's own `data-shape`. Under
+ * `prefers-reduced-motion` nothing moves; states still change.
+ *
+ * Every part turns around the centre of the 24 grid unless it says otherwise,
+ * so parts move together without wrapper groups.
+ *
+ * Once UI core keeps the same rules in its Icon.module.scss; change both.
+ */
+
+:root,
+[data-border="rounded"],
+[data-shape="rounded"] {
+  --icon-motion-duration: 320ms;
+  --icon-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --icon-motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --icon-motion-pop: 1.07;
+}
+[data-border="playful"],
+[data-shape="playful"] {
+  --icon-motion-duration: 420ms;
+  --icon-motion-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --icon-motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --icon-motion-pop: 1.14;
+}
+[data-border="conservative"],
+[data-shape="conservative"] {
+  --icon-motion-duration: 200ms;
+  --icon-motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --icon-motion-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --icon-motion-pop: 1;
+}
+
+[data-animate] path {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+
+/* Check: the short leg goes quickly, the long leg settles, then a small pop. */
+[data-animate][data-icon="check"] [data-part="tick"] {
+  stroke-dasharray: 1;
+}
+:is(
+    [data-animate][data-active],
+    [data-animate="in"],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  )[data-icon="check"]
+  [data-part="tick"] {
+  animation:
+    icon-draw-check calc(var(--icon-motion-duration) * 1.9) linear both,
+    icon-pop calc(var(--icon-motion-duration) * 1.1) var(--icon-motion-ease) calc(var(--icon-motion-duration) * 1.5) both;
+}
+
+/* Checkbox: the box fills, then the tick draws through it. Off, the box is empty. */
+[data-animate][data-icon="checkbox"] [data-part="box"] {
+  transition: fill var(--icon-motion-duration) var(--icon-motion-ease-out);
+}
+[data-animate][data-icon="checkbox"] [data-part="tick"] {
+  stroke: var(--icon-knock, var(--page-background, #fff));
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0s;
+}
+:is([data-animate][data-active], [data-animate="in"])[data-icon="checkbox"] path {
+  animation: icon-pop calc(var(--icon-motion-duration) * 1.2) var(--icon-motion-ease);
+}
+:is([data-animate][data-active], [data-animate="in"])[data-icon="checkbox"] [data-part="box"] {
+  fill: currentColor;
+}
+:is([data-animate][data-active], [data-animate="in"])[data-icon="checkbox"] [data-part="tick"] {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset calc(var(--icon-motion-duration) * 1.4) var(--icon-motion-ease-out)
+    calc(var(--icon-motion-duration) * 0.45);
+}
+
+/* Bell: the body swings from its top, the clapper follows a beat later. */
+[data-animate][data-icon="bell"] path {
+  transform-origin: 12px 4px;
+}
+:is(
+    [data-animate][data-active],
+    [data-animate="in"],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  )[data-icon="bell"] [data-part="body"] {
+  animation: icon-swing calc(var(--icon-motion-duration) * 2.4) ease-out;
+}
+:is(
+    [data-animate][data-active],
+    [data-animate="in"],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  )[data-icon="bell"] [data-part="clapper"] {
+  animation: icon-swing-clapper calc(var(--icon-motion-duration) * 2.4) ease-out 50ms;
+}
+
+/* Plus to close: a turn and a touch longer, for add buttons that become cancel. */
+[data-animate][data-icon="plus"] path,
+[data-animate]:is([data-icon="chevronDown"], [data-icon="chevronUp"], [data-icon="chevronLeft"], [data-icon="chevronRight"]) path {
+  transition: transform var(--icon-motion-duration) var(--icon-motion-ease);
+}
+[data-animate][data-active][data-icon="plus"] path {
+  transform: rotate(135deg) scale(1.1);
+}
+/* Chevrons flip, for an accordion or a select opening. */
+[data-animate][data-active]:is([data-icon="chevronDown"], [data-icon="chevronUp"], [data-icon="chevronLeft"], [data-icon="chevronRight"]) path {
+  transform: rotate(180deg);
+}
+
+/* Arrows lean the way they point. */
+[data-animate][data-icon="arrowRight"] { --icon-lean: 2.5px, 0px; }
+[data-animate][data-icon="arrowLeft"] { --icon-lean: -2.5px, 0px; }
+[data-animate][data-icon="arrowUp"] { --icon-lean: 0px, -2.5px; }
+[data-animate][data-icon="arrowDown"] { --icon-lean: 0px, 2.5px; }
+[data-animate]:is([data-icon="arrowRight"], [data-icon="arrowLeft"], [data-icon="arrowUp"], [data-icon="arrowDown"]) path {
+  transition: transform var(--icon-motion-duration) var(--icon-motion-ease);
+}
+:is(
+    [data-animate][data-active],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  ):is([data-icon="arrowRight"], [data-icon="arrowLeft"], [data-icon="arrowUp"], [data-icon="arrowDown"])
+  path {
+  transform: translate(var(--icon-lean));
+}
+
+/* Refresh: one full turn. */
+:is(
+    [data-animate][data-active],
+    [data-animate="in"],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  )[data-icon="refresh"]
+  path {
+  animation: icon-spin calc(var(--icon-motion-duration) * 3.8) cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+/* Eye: blinks once. */
+:is(
+    [data-animate][data-active],
+    [data-animate="in"],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  )[data-icon="eye"]
+  path {
+  animation: icon-blink calc(var(--icon-motion-duration) * 1.1) ease-in-out;
+}
+
+/* Heart: the line turns solid with a beat, for like and favourite. */
+[data-animate][data-icon="heart"] path {
+  transition: fill calc(var(--icon-motion-duration) * 0.6) var(--icon-motion-ease-out);
+}
+:is([data-animate][data-active], [data-animate="in"])[data-icon="heart"] path {
+  fill: currentColor;
+  animation: icon-beat calc(var(--icon-motion-duration) * 1.8) var(--icon-motion-ease);
+}
+
+/* Trash: the lid lifts and tips before a delete. */
+[data-animate][data-icon="trash"] [data-part="lid"] {
+  transform-origin: 19px 6.5px;
+  transition: transform var(--icon-motion-duration) var(--icon-motion-ease);
+}
+:is(
+    [data-animate][data-active],
+    [data-animate="hover"]:hover,
+    :where(a, button, [role="button"], [role="link"], [role="menuitem"], [role="option"], [role="tab"], label, summary):is(:hover, :focus-visible)
+      [data-animate="hover"]
+  )[data-icon="trash"]
+  [data-part="lid"] {
+  transform: translateY(-1.6px) rotate(14deg);
+}
+
+/* Menu: the three lines fold into a cross in the same spot. */
+[data-animate][data-icon="menu"] path {
+  transition:
+    transform var(--icon-motion-duration) var(--icon-motion-ease),
+    opacity calc(var(--icon-motion-duration) * 0.6) ease;
+}
+[data-animate][data-active][data-icon="menu"] [data-part="top"] {
+  transform: translateY(5.25px) rotate(45deg);
+}
+[data-animate][data-active][data-icon="menu"] [data-part="middle"] {
+  opacity: 0;
+  transform: scaleX(0.2);
+}
+[data-animate][data-active][data-icon="menu"] [data-part="bottom"] {
+  transform: translateY(-5.25px) rotate(-45deg);
+}
+
+@keyframes icon-draw-check {
+  0% {
+    stroke-dashoffset: 1;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  32% {
+    stroke-dashoffset: 0.68;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes icon-pop {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(var(--icon-motion-pop)); }
+}
+@keyframes icon-swing {
+  0% { transform: rotate(0); }
+  15% { transform: rotate(14deg); }
+  35% { transform: rotate(-11deg); }
+  55% { transform: rotate(7deg); }
+  75% { transform: rotate(-3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes icon-swing-clapper {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(18deg); }
+  42% { transform: rotate(-14deg); }
+  62% { transform: rotate(8deg); }
+  82% { transform: rotate(-3deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes icon-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes icon-blink {
+  0%, 100% { transform: scaleY(1); }
+  45%, 55% { transform: scaleY(0.08); }
+}
+@keyframes icon-beat {
+  0% { transform: scale(1); }
+  25% { transform: scale(calc(var(--icon-motion-pop) + 0.08)); }
+  50% { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] path {
+    animation: none !important;
+    transition: none !important;
+  }
+}

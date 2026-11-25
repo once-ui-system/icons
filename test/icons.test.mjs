@@ -35,3 +35,20 @@ test("brands: every mark draws", async () => {
     }
   }
 });
+
+test("motion: every animated icon exists and has the parts its motion moves", async () => {
+  const { MOTIONS, MOTION_PARTS } = await import("../src/motion.mjs");
+  for (const name of Object.keys(MOTIONS)) assert.ok(ICONS[name], `${name} is drawn`);
+  for (const [name, parts] of Object.entries(MOTION_PARTS))
+    for (const [shape, s] of Object.entries(SHAPES)) {
+      const have = new Set(ICONS[name](s).map((p) => p.part));
+      for (const part of parts) assert.ok(have.has(part), `${name}/${shape} has part ${part}`);
+    }
+});
+
+test("motion: the stylesheet names every animated icon", async () => {
+  const fs = await import("node:fs");
+  const { MOTIONS } = await import("../src/motion.mjs");
+  const css = fs.readFileSync(new URL("../src/motion.css", import.meta.url), "utf8");
+  for (const name of Object.keys(MOTIONS)) assert.ok(css.includes(`[data-icon="${name}"]`), `motion.css moves ${name}`);
+});
